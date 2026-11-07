@@ -1,6 +1,7 @@
 name: UAPC NM - Build Android APK (public / no Mac)
 
 # Public standalone templates only. Never checkout private UAPC or connect to Neon.
+run-name: UAPC-NM request ${{ github.event.inputs.request_id || github.run_id }}
 on:
   workflow_dispatch:
     inputs:
@@ -11,6 +12,11 @@ on:
         type: string
       app_title:
         description: "Nama aplikasi (pilihan; maksimum 48 aksara)"
+        required: false
+        default: ""
+        type: string
+      request_id:
+        description: "Kod permintaan automasi UAPC (boleh dibiarkan kosong)"
         required: false
         default: ""
         type: string
