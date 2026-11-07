@@ -1,0 +1,81 @@
+name: UAPC NM - Build Android APK (public / no Mac)
+
+# Public standalone templates only. Never checkout private UAPC or connect to Neon.
+on:
+  workflow_dispatch:
+    inputs:
+      objective:
+        description: "Arahan: nota, tugasan, inventori atau perbelanjaan"
+        required: true
+        default: "Bina aplikasi nota"
+        type: string
+      app_title:
+        description: "Nama aplikasi (pilihan; maksimum 48 aksara)"
+        required: false
+        default: ""
+        type: string
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/build-android.yml"
+      - "builder/**"
+      - "tests/**"
+permissions:
+  contents: read
+concurrency:
+  group: uapc-nm-public-apk
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout public builder only
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test four public source templates
+        run: python -m unittest discover -s tests -v
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+      - name: Install Android platform 35
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - name: Set up Gradle 8.9
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Generate Android application from allowlisted objective
+        env:
+          BUILD_OBJECTIVE: \${{ github.event.inputs.objective || 'Bina aplikasi nota' }}
+          BUILD_TITLE: \${{ github.event.inputs.app_title || '' }}
+        run: |
+          python builder/generate.py \
+            --objective "$BUILD_OBJECTIVE" \
+            --title "$BUILD_TITLE" \
+            --out generated
+      - name: Compile genuine Android APK
+        run: |
+          cd generated
+          gradle :app:assembleDebug --no-daemon
+      - name: Verify AndroidManifest.xml, classes.dex and SHA-256
+        run: |
+          mkdir -p output
+          cp generated/app/build/outputs/apk/debug/app-debug.apk output/UAPC-NM-Android.apk
+          python builder/verify.py output/UAPC-NM-Android.apk \
+            --output output/build-report.json
+      - name: Publish APK and verification report as ZIP artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: UAPC-NM-Android-APK
+          path: output/*
+          retention-days: 7
+          if-no-files-found: error
