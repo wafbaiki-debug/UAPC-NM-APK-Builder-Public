@@ -65,8 +65,8 @@ jobs:
           gradle-version: '8.9'
       - name: Generate Android application from allowlisted objective
         env:
-          BUILD_OBJECTIVE: \${{ github.event.inputs.objective || 'Bina aplikasi nota' }}
-          BUILD_TITLE: \${{ github.event.inputs.app_title || '' }}
+          BUILD_OBJECTIVE: ${{ github.event.inputs.objective || 'Bina aplikasi nota' }}
+          BUILD_TITLE: ${{ github.event.inputs.app_title || 'NM Catatan' }}
         run: |
           python builder/generate.py \
             --objective "$BUILD_OBJECTIVE" \
