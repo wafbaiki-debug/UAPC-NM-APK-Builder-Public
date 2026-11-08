@@ -11,16 +11,21 @@ Pembina APK asli Android **tanpa Mac**, menggunakan runner GitHub Actions awam. 
 5. Muat turun **UAPC-NM-Android-APK** ZIP, ekstrak, kemudian pasang **UAPC-NM-Android.apk** pada Android.
 6. Uji fungsi **Tambah**, menyimpan rekod, menutup/membuka semula aplikasi dan **Padam rekod**.
 
+## UAPC NM Controller (cabang pembangunan)
+
+Pada cabang `feat/uapc-controller-apk-20261109`, arahan `Bina UAPC Controller` menjana aplikasi Android luar talian untuk daftar objektif, tanda siap/buka semula, mengesan objektif berganda, memadam dengan pengesahan, dan menyimpan rekod pada telefon. Ini **bukan** worker automatik, sambungan Neon, atau GUI Production UAPC. Ia tidak memerlukan akses Internet atau rahsia UAPC. Jangan dakwa APK siap sebelum workflow menghasilkan artifact dan pemasangan Android disahkan.
+
 ## Templat tersedia
 
 | Kata kunci arahan | Fungsi aplikasi |
 | --- | --- |
+| UAPC / controller (cabang pembangunan) | Daftar, tandakan siap, cegah pendua dan padam objektif setempat |
 | nota / catatan / memo | Simpan dan padam nota |
 | tugasan / tugas / todo | Senarai tugasan dan tanda siap |
 | inventori / stok / barang | Rekod barangan/stok |
 | perbelanjaan / belanja / bajet | Rekod amaun RM dan jumlah |
 
-Permintaan jenis aplikasi lain ditolak; tiada tuntutan bahawa pembina ini boleh menjana sebarang aplikasi rumit. Fail yang dibina ialah **debug APK** untuk ujian, bukan keluaran Play Store.
+Pada cabang `main`, hanya empat templat asal disokong sehingga PR controller diluluskan. Permintaan jenis aplikasi lain ditolak; tiada tuntutan bahawa pembina ini boleh menjana sebarang aplikasi rumit. Fail yang dibina ialah **debug APK** untuk ujian, bukan keluaran Play Store.
 
 ## Pemeriksaan automatik
 
