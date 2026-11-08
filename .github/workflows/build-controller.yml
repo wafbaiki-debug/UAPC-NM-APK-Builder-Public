@@ -69,6 +69,9 @@ jobs:
           Path("output/controller-build-report.json").write_text(json.dumps(result, indent=2)+"\\n")
           print("APK_VERIFIED", json.dumps(result), flush=True)
           PY
+          echo "Checking Android APK cryptographic signature:"
+          SDK_BUILD_TOOLS="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}/build-tools/35.0.0"
+          "$SDK_BUILD_TOOLS/apksigner" verify --verbose --print-certs output/UAPC-NM-Controller.apk | tee output/signature-verification.log
       - name: Publish diagnostic log even on failure
         if: always()
         uses: actions/upload-artifact@v4
