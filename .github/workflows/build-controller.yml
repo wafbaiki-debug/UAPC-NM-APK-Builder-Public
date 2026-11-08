@@ -21,6 +21,12 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+      - name: Validate controller source generator
+        run: |
+          python3 -m py_compile controller/generate.py
+          python3 controller/generate.py
+          test -f generated-controller/app/src/main/AndroidManifest.xml
+          test -f generated-controller/app/src/main/java/my/nm/uapc/MainActivity.java
       - name: Check Android SDK 35
         run: |
           set -euo pipefail
@@ -36,8 +42,6 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
-      - name: Generate public controller source
-        run: python3 controller/generate.py
       - name: Compile Android APK
         run: |
           set -o pipefail
