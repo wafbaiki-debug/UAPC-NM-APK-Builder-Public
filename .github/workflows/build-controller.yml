@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'controller/**'
+      - 'builder/**'
       - '.github/workflows/build-controller.yml'
   workflow_dispatch:
 permissions:
@@ -66,7 +67,7 @@ jobs:
           dest = Path("output/UAPC-NM-Controller.apk")
           copy2(apk, dest)
           result = verify_apk(dest)
-          Path("output/controller-build-report.json").write_text(json.dumps(result, indent=2)+"\\n")
+          Path("output/controller-build-report.json").write_text(json.dumps(result, indent=2)+"\n")
           print("APK_VERIFIED", json.dumps(result), flush=True)
           PY
           echo "Checking Android APK cryptographic signature:"
@@ -80,6 +81,8 @@ jobs:
           path: |
             controller-build.log
             output/verification.log
+            output/signature-verification.log
+            output/controller-build-report.json
             output/UAPC-NM-Controller.apk
           if-no-files-found: ignore
           retention-days: 7
