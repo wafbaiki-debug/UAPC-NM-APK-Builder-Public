@@ -39,12 +39,22 @@ jobs:
       - name: Generate public controller source
         run: python3 controller/generate.py
       - name: Compile Android APK
-        run: cd generated-controller && gradle :app:assembleDebug --no-daemon
+        run: |
+          set -o pipefail
+          cd generated-controller
+          gradle :app:assembleDebug --no-daemon --stacktrace --info 2>&1 | tee ../controller-build.log
       - name: Verify and package
         run: |
           mkdir -p output
           cp generated-controller/app/build/outputs/apk/debug/app-debug.apk output/UAPC-NM-Controller.apk
           python3 builder/verify.py output/UAPC-NM-Controller.apk --output output/controller-build-report.json
+      - name: Publish diagnostic log even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: UAPC-Controller-Build-Diagnostics
+          path: controller-build.log
+          if-no-files-found: ignore
       - uses: actions/upload-artifact@v4
         with:
           name: UAPC-NM-Controller-APK
