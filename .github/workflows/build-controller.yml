@@ -49,9 +49,19 @@ jobs:
           gradle :app:assembleDebug --no-daemon --stacktrace --info 2>&1 | tee ../controller-build.log
       - name: Verify and package
         run: |
+          set -euo pipefail
           mkdir -p output
-          cp generated-controller/app/build/outputs/apk/debug/app-debug.apk output/UAPC-NM-Controller.apk
+          echo "Inspecting generated Android build outputs:"
+          find generated-controller/app/build/outputs -type f -maxdepth 7 -print
+          APK_PATH="$(find generated-controller/app/build/outputs/apk -type f -name '*.apk' -print -quit)"
+          if [ -z "$APK_PATH" ] || [ ! -s "$APK_PATH" ]; then
+            echo "::error::Gradle reported success but no nonempty APK was found"
+            exit 1
+          fi
+          echo "Using APK: $APK_PATH"
+          cp "$APK_PATH" output/UAPC-NM-Controller.apk
           python3 builder/verify.py output/UAPC-NM-Controller.apk --output output/controller-build-report.json
+          ls -lh output/
       - name: Publish diagnostic log even on failure
         if: always()
         uses: actions/upload-artifact@v4
