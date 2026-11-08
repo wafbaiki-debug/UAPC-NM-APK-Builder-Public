@@ -13,6 +13,7 @@ from pathlib import Path
 import re
 
 TEMPLATES = {
+    "controller": (r"\b(?:uapc|controller|pengawal projek)\b", "Controller"),
     "tasks": (r"\b(?:tugas(?:an)?|todo|to-do|tasks?|checklist)\b", "Tugasan"),
     "notes": (r"\b(?:nota|catatan|notes?|memo)\b", "Catatan"),
     "inventory": (r"\b(?:inventori|inventory|stok|stock|barang)\b", "Inventori"),
@@ -85,14 +86,14 @@ public final class MainActivity extends Activity {
             LinearLayout card = new LinearLayout(this);
             card.setOrientation(LinearLayout.VERTICAL);
             card.setPadding(10, 10, 10, 10);
-            if (kind.equals("tasks")) {
+            if (kind.equals("tasks") || kind.equals("controller")) {
                 CheckBox completed = new CheckBox(this);
                 completed.setText(item.optString("name", ""));
                 completed.setChecked(item.optBoolean("done", false));
                 completed.setOnCheckedChangeListener((v, checked) -> {
                     JSONObject current = entries.optJSONObject(index);
                     if (current != null) {
-                        try { current.put("done", checked); persist(); }
+                        try { current.put("done", checked); persist(); if (kind.equals("controller")) render(); }
                         catch (Exception ignored) {}
                     }
                 });
@@ -106,15 +107,29 @@ public final class MainActivity extends Activity {
                 }
             }
             Button delete = new Button(this);
-            delete.setText("Padam rekod");
-            delete.setOnClickListener(v -> removeAt(index));
+            delete.setText(kind.equals("controller") ? "Padam objektif" : "Padam rekod");
+            delete.setOnClickListener(v -> {
+                if (kind.equals("controller")) {
+                    new android.app.AlertDialog.Builder(this).setTitle("Padam objektif?")
+                        .setMessage("Tindakan ini tidak boleh dibatalkan.")
+                        .setNegativeButton("Batal", null)
+                        .setPositiveButton("Padam", (dialog, which) -> removeAt(index)).show();
+                } else removeAt(index);
+            });
             card.addView(delete);
             rows.addView(card);
         }
         if (kind.equals("expenses")) {
             summary.setText(String.format(Locale.US, "Jumlah: RM %.2f", total));
         } else {
-            summary.setText("Bilangan rekod: " + entries.length());
+            if (kind.equals("controller")) {
+                int finished = 0;
+                for (int j = 0; j < entries.length(); j++) {
+                    JSONObject e = entries.optJSONObject(j);
+                    if (e != null && e.optBoolean("done", false)) finished++;
+                }
+                summary.setText("Objektif siap: " + finished + "/" + entries.length());
+            } else summary.setText("Bilangan rekod: " + entries.length());
         }
     }
     private void addRecord() {
@@ -136,6 +151,16 @@ public final class MainActivity extends Activity {
             } catch (NumberFormatException exception) {
                 Toast.makeText(this, "Masukkan jumlah RM yang sah", Toast.LENGTH_SHORT).show();
                 return;
+            }
+        }
+        if (kind.equals("controller")) {
+            for (int i = 0; i < entries.length(); i++) {
+                JSONObject existing = entries.optJSONObject(i);
+                if (existing != null && name.equalsIgnoreCase(existing.optString("name", ""))) {
+                    new android.app.AlertDialog.Builder(this).setMessage("Objektif sudah wujud")
+                        .setPositiveButton("OK", null).show();
+                    return;
+                }
             }
         }
         try {
@@ -161,13 +186,14 @@ public final class MainActivity extends Activity {
 
         root.addView(text(getString(R.string.app_name), 25));
         root.addView(text("Aplikasi luar talian • Nyamuk Menggigit", 13));
+        if (kind.equals("controller")) root.addView(text("UAPC Controller • objektif setempat • bukan backend awan", 14));
 
         nameField = new EditText(this);
         nameField.setSingleLine(true);
-        nameField.setHint("Nama rekod");
+        nameField.setHint(kind.equals("controller") ? "Objektif projek" : "Nama rekod");
         root.addView(nameField);
 
-        if (!kind.equals("tasks")) {
+        if (!kind.equals("tasks") && !kind.equals("controller")) {
             detailsField = new EditText(this);
             if (kind.equals("notes")) {
                 detailsField.setHint("Isi nota");
@@ -184,7 +210,7 @@ public final class MainActivity extends Activity {
             root.addView(detailsField);
         }
         Button add = new Button(this);
-        add.setText("Tambah");
+        add.setText(kind.equals("controller") ? "Daftar objektif" : "Tambah");
         add.setOnClickListener(v -> addRecord());
         root.addView(add);
 
@@ -208,7 +234,7 @@ def classify(objective: str) -> str:
     matches = [kind for kind, (pattern, _) in TEMPLATES.items()
                if re.search(pattern, objective, re.IGNORECASE)]
     if len(matches) != 1:
-        raise ValueError("Jenis aplikasi tidak jelas: pilih nota, tugasan, inventori atau belanja")
+        raise ValueError("Jenis aplikasi tidak jelas: pilih UAPC, nota, tugasan, inventori atau belanja")
     return matches[0]
 
 
