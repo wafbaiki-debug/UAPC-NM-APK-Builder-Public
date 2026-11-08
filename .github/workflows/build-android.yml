@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       objective:
-        description: "Arahan: nota, tugasan, inventori atau perbelanjaan"
+        description: "Arahan: UAPC, nota, tugasan, inventori atau perbelanjaan"
         required: true
         default: "Bina aplikasi nota"
         type: string
@@ -21,7 +21,7 @@ on:
         default: ""
         type: string
   push:
-    branches: [main]
+    branches: [main, feat/uapc-controller-apk-20261109]
     paths:
       - ".github/workflows/build-android.yml"
       - "builder/**"
@@ -44,7 +44,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Test four public source templates
+      - name: Test public source templates including UAPC controller
         run: python -m unittest discover -s tests -v
       - name: Set up Java 17
         uses: actions/setup-java@v4
@@ -71,8 +71,8 @@ jobs:
           gradle-version: '8.9'
       - name: Generate Android application from allowlisted objective
         env:
-          BUILD_OBJECTIVE: ${{ github.event.inputs.objective || 'Bina aplikasi nota' }}
-          BUILD_TITLE: ${{ github.event.inputs.app_title || 'NM Catatan' }}
+          BUILD_OBJECTIVE: ${{ github.event.inputs.objective || 'Bina UAPC Controller' }}
+          BUILD_TITLE: ${{ github.event.inputs.app_title || 'UAPC NM Controller' }}
         run: |
           python builder/generate.py \
             --objective "$BUILD_OBJECTIVE" \

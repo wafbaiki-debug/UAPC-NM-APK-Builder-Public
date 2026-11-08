@@ -11,6 +11,7 @@ class GeneratorTest(unittest.TestCase):
     def test_supported_families(self):
         expected = {
             "Bina aplikasi nota untuk saya": "notes",
+            "Bina UAPC Controller": "controller",
             "Bina aplikasi tugasan harian": "tasks",
             "Urus inventori stok": "inventory",
             "Catat perbelanjaan bulanan": "expenses",
@@ -52,6 +53,18 @@ class GeneratorTest(unittest.TestCase):
             self.assertIn("&lt;Hello&gt;", content)
             java = next(Path(directory).rglob("MainActivity.java")).read_text()
             self.assertNotIn("Hello", java)
+
+    def test_controller_objectives_and_safety(self):
+        with tempfile.TemporaryDirectory() as directory:
+            result = generate("UAPC Controller", "UAPC NM", Path(directory))
+            self.assertEqual(result["template"], "controller")
+            java = next(Path(directory).rglob("MainActivity.java")).read_text()
+            self.assertIn("Daftar objektif", java)
+            self.assertIn("Objektif sudah wujud", java)
+            self.assertIn("Padam objektif?", java)
+            self.assertIn("Objektif siap:", java)
+            manifest = next(Path(directory).rglob("AndroidManifest.xml")).read_text()
+            self.assertNotIn("uses-permission", manifest)
 
     def test_title_length(self):
         with tempfile.TemporaryDirectory() as directory:
