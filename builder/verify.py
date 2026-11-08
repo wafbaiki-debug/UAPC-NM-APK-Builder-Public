@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 from zipfile import BadZipFile, ZipFile
 
-MIN_APK_BYTES = 8192
+MIN_APK_BYTES = 4096
 REQUIRED_ENTRIES = {"AndroidManifest.xml", "classes.dex"}
 
 
@@ -17,7 +17,7 @@ def verify_apk(path: Path) -> dict:
         raise ValueError("APK tidak ditemui")
     size = path.stat().st_size
     if size < MIN_APK_BYTES:
-        raise ValueError("APK terlalu kecil untuk dipasang")
+        raise ValueError(f"APK terlalu kecil: {size} bait; minimum {MIN_APK_BYTES}")
     try:
         with ZipFile(path) as archive:
             if archive.testzip() is not None:
