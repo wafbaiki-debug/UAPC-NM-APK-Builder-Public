@@ -10,14 +10,21 @@ _REGISTRY = {}
 
 def register_templates(templates):
     """Register a fixed set of reviewed templates, rejecting collisions."""
+    staged = {}
     for name, spec in templates.items():
         if not re.fullmatch(r"[a-z][a-z0-9_]{0,39}", name):
             raise ValueError("invalid_template_name")
-        if name in _REGISTRY:
+        if name in _REGISTRY or name in staged:
             raise ValueError("duplicate_template_name")
+        if not isinstance(spec, (tuple, list)) or len(spec) != 2:
+            raise ValueError("invalid_template_spec")
         pattern, label = spec
+        if not isinstance(pattern, str) or not isinstance(label, str) or not label.strip():
+            raise ValueError("invalid_template_spec")
         re.compile(pattern)
-        _REGISTRY[name] = (pattern, label)
+        staged[name] = (pattern, label)
+    # Do not leave half-registered families if one module is invalid.
+    _REGISTRY.update(staged)
 
 def resolve_template(objective):
     """Resolve exactly one reviewed app family; fail closed on ambiguity."""
