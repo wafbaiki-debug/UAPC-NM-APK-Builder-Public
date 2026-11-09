@@ -217,6 +217,10 @@ def classify(objective: str) -> str:
 
 def generate(objective: str, title: str, destination: Path) -> dict:
     kind = classify(objective)
+    # Registry entries describe possible families, but only reviewed generators
+    # can produce an APK. Never silently compile a generic app for a new family.
+    if kind not in TEMPLATES:
+        raise ValueError('Modul aplikasi belum mempunyai penjana Android yang disahkan')
     if not isinstance(title, str):
         raise ValueError("Nama aplikasi mesti teks")
     title = title.strip() or "NM " + TEMPLATES[kind][1]
