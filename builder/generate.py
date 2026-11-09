@@ -20,7 +20,10 @@ TEMPLATES = {
 }
 # Extensible registry for independently reviewed application families.
 # Modules must be explicitly registered; never fetch or execute user-supplied code.
-from builder.registry import register_templates, resolve_template
+try:
+    from builder.registry import register_templates, resolve_template
+except ModuleNotFoundError:
+    from registry import register_templates, resolve_template
 register_templates(TEMPLATES)
 MAX_OBJECTIVE = 180
 
