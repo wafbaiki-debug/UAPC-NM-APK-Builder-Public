@@ -18,6 +18,10 @@ TEMPLATES = {
     "inventory": (r"\b(?:inventori|inventory|stok|stock|barang)\b", "Inventori"),
     "expenses": (r"\b(?:belanja|perbelanjaan|expenses?|budget|bajet|kewangan)\b", "Belanja"),
 }
+# Extensible registry for independently reviewed application families.
+# Modules must be explicitly registered; never fetch or execute user-supplied code.
+from builder.registry import register_templates, resolve_template
+register_templates(TEMPLATES)
 MAX_OBJECTIVE = 180
 
 ACTIVITY = r'''package %PACKAGE%;
@@ -205,11 +209,7 @@ public final class MainActivity extends Activity {
 def classify(objective: str) -> str:
     if not isinstance(objective, str) or not (1 <= len(objective.strip()) <= MAX_OBJECTIVE):
         raise ValueError("Arahan perlu antara 1 dan 180 aksara")
-    matches = [kind for kind, (pattern, _) in TEMPLATES.items()
-               if re.search(pattern, objective, re.IGNORECASE)]
-    if len(matches) != 1:
-        raise ValueError("Jenis aplikasi tidak jelas: pilih nota, tugasan, inventori atau belanja")
-    return matches[0]
+    return resolve_template(objective)
 
 
 def generate(objective: str, title: str, destination: Path) -> dict:
