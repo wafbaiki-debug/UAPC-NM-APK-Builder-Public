@@ -21,3 +21,5 @@ jobs:
         run: |
           test -n "$GITHUB_WORKSPACE"
           echo "PUBLIC_RUNNER_OK=true"
+
+# Re-trigger public runner diagnostic after owner requested autonomous execution.
