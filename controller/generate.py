@@ -33,10 +33,15 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebChromeClient;
+import android.webkit.ValueCallback;
+import android.webkit.DownloadListener;
+import android.widget.Toast;
 import android.content.Intent;
 import android.net.Uri;
 public class MainActivity extends Activity {
  private WebView web;
+ private ValueCallback<Uri[]> pendingFiles;
+ private static final int FILE_PICKER_REQUEST=701;
  private static final String HOST="uapc-android-development.vercel.app";
  @Override public void onCreate(Bundle state) {
   super.onCreate(state);
@@ -44,7 +49,26 @@ public class MainActivity extends Activity {
   web.getSettings().setJavaScriptEnabled(true);
   web.getSettings().setDomStorageEnabled(true);
   CookieManager.getInstance().setAcceptCookie(true);
-  web.setWebChromeClient(new WebChromeClient());
+  web.setWebChromeClient(new WebChromeClient() {
+   @Override public boolean onShowFileChooser(WebView view,ValueCallback<Uri[]> callback,FileChooserParams params) {
+    if(pendingFiles!=null) pendingFiles.onReceiveValue(null);
+    pendingFiles=callback;
+    try { startActivityForResult(params.createIntent(),FILE_PICKER_REQUEST); }
+    catch(Exception e) {
+     pendingFiles.onReceiveValue(null); pendingFiles=null;
+     Toast.makeText(MainActivity.this,"Cannot open file picker",Toast.LENGTH_LONG).show();
+     return false;
+    }
+    return true;
+   }
+  });
+  web.setDownloadListener((url,userAgent,contentDisposition,mimeType,length)->{
+   Uri uri=Uri.parse(url);
+   if("https".equals(uri.getScheme())) {
+    try { startActivity(new Intent(Intent.ACTION_VIEW,uri)); }
+    catch(Exception e) { Toast.makeText(this,"Cannot open download",Toast.LENGTH_LONG).show(); }
+   }
+  });
   web.setWebViewClient(new WebViewClient() {
    @Override public boolean shouldOverrideUrlLoading(WebView view,WebResourceRequest req) {
     Uri uri=req.getUrl();
@@ -55,6 +79,13 @@ public class MainActivity extends Activity {
   });
   setContentView(web);
   web.loadUrl("https://"+HOST+"/");
+ }
+ @Override protected void onActivityResult(int requestCode,int resultCode,Intent data) {
+  super.onActivityResult(requestCode,resultCode,data);
+  if(requestCode==FILE_PICKER_REQUEST && pendingFiles!=null) {
+   pendingFiles.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode,data));
+   pendingFiles=null;
+  }
  }
  @Override public void onBackPressed() {
   if(web.canGoBack()) web.goBack(); else super.onBackPressed();
