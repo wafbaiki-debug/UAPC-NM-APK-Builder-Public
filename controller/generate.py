@@ -1,8 +1,13 @@
 """Public, secret-free Android shell for the UAPC NM production web controller."""
 from pathlib import Path
+from shutil import copyfile
+
 root=Path("generated-controller")
 java=root/"app/src/main/java/my/nm/uapc"
 java.mkdir(parents=True,exist_ok=True)
+icons=root/"app/src/main/res/mipmap-nodpi"
+icons.mkdir(parents=True,exist_ok=True)
+copyfile(Path(__file__).with_name("launcher_nyamuk.jpg"),icons/"launcher_nyamuk.jpg")
 (root/"settings.gradle").write_text("""pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
 dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral() } }
 rootProject.name='UAPC-NM-Controller'
@@ -14,13 +19,13 @@ include ':app'
 android {
  namespace 'my.nm.uapc'
  compileSdk 35
- defaultConfig { applicationId 'my.nm.uapc'; minSdk 26; targetSdk 35; versionCode 1; versionName '0.1.0' }
+ defaultConfig { applicationId 'my.nm.uapc'; minSdk 26; targetSdk 35; versionCode 2; versionName '0.1.1' }
 }
 """)
 (root/"app/src/main/AndroidManifest.xml").write_text("""<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 <uses-permission android:name="android.permission.INTERNET"/>
-<application android:label="UAPC NM" android:usesCleartextTraffic="false" android:theme="@android:style/Theme.Material.Light.NoActionBar">
+<application android:label="UAPC NM" android:icon="@mipmap/launcher_nyamuk" android:usesCleartextTraffic="false" android:theme="@android:style/Theme.Material.Light.NoActionBar">
 <activity android:name=".MainActivity" android:exported="true">
 <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
 </activity></application></manifest>
