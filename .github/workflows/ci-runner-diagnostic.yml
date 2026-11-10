@@ -1,0 +1,23 @@
+name: CI runner diagnostic (public, no secrets)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ci-runner-diagnostic.yml'
+permissions:
+  contents: read
+jobs:
+  runner-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Prove public runner can start
+        run: |
+          echo "RUNNER_STARTED=true"
+          uname -a
+          python3 --version
+      - name: Check GitHub workspace without secrets
+        run: |
+          test -n "$GITHUB_WORKSPACE"
+          echo "PUBLIC_RUNNER_OK=true"
