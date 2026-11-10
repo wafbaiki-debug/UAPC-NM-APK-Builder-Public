@@ -86,10 +86,14 @@ jobs:
             output/UAPC-NM-Controller.apk
           if-no-files-found: ignore
           retention-days: 7
-      - uses: actions/upload-artifact@v4
-        if: always()
+      - name: Publish verified Controller APK only after successful build
+        uses: actions/upload-artifact@v4
+        if: success()
         with:
           name: UAPC-NM-Controller-APK
-          path: output/*
+          path: |
+            output/UAPC-NM-Controller.apk
+            output/controller-build-report.json
+            output/signature-verification.log
           retention-days: 7
           if-no-files-found: error
