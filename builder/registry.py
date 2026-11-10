@@ -21,7 +21,10 @@ def register_templates(templates):
         pattern, label = spec
         if not isinstance(pattern, str) or not isinstance(label, str) or not label.strip():
             raise ValueError("invalid_template_spec")
-        re.compile(pattern)
+        try:
+            re.compile(pattern)
+        except re.error as exc:
+            raise ValueError("invalid_template_pattern") from exc
         staged[name] = (pattern, label)
     # Do not leave half-registered families if one module is invalid.
     _REGISTRY.update(staged)
