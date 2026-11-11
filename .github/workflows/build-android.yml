@@ -61,6 +61,20 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
+      - name: Reject implicit or obsolete NM template builds
+        env:
+          BUILD_OBJECTIVE: ${{ github.event.inputs.objective }}
+          BUILD_TITLE: ${{ github.event.inputs.app_title }}
+        run: |
+          python - <<'PY'
+          import os
+          objective = os.environ.get("BUILD_OBJECTIVE", "").strip()
+          title = os.environ.get("BUILD_TITLE", "").strip()
+          if not objective or not title:
+              raise SystemExit("BLOCKED: explicit objective and application title required")
+          if title.casefold() in ("nm catatan", "nm tugasan"):
+              raise SystemExit("BLOCKED: obsolete generic NM APK title")
+          PY
       - name: Generate Android application from allowlisted objective
         env:
           BUILD_OBJECTIVE: ${{ github.event.inputs.objective }}
