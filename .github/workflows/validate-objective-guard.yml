@@ -1,0 +1,26 @@
+name: Validate unsupported-objective guard
+on:
+  push:
+    branches:
+      - fix/reject-unsupported-objectives-20261111
+    paths:
+      - 'builder/**'
+      - 'tests/**'
+      - '.github/workflows/validate-objective-guard.yml'
+  pull_request:
+    paths:
+      - 'builder/**'
+      - 'tests/**'
+permissions:
+  contents: read
+jobs:
+  guard-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m unittest discover -s tests -v
