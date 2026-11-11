@@ -8,24 +8,16 @@ on:
       objective:
         description: "Arahan: nota, tugasan, inventori atau perbelanjaan"
         required: true
-        default: "Bina aplikasi nota"
         type: string
       app_title:
         description: "Nama aplikasi (pilihan; maksimum 48 aksara)"
         required: false
-        default: ""
         type: string
       request_id:
         description: "Kod permintaan automasi UAPC (boleh dibiarkan kosong)"
         required: false
         default: ""
         type: string
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/build-android.yml"
-      - "builder/**"
-      - "tests/**"
 permissions:
   contents: read
 concurrency:
@@ -71,8 +63,8 @@ jobs:
           gradle-version: '8.9'
       - name: Generate Android application from allowlisted objective
         env:
-          BUILD_OBJECTIVE: ${{ github.event.inputs.objective || 'Bina aplikasi nota' }}
-          BUILD_TITLE: ${{ github.event.inputs.app_title || 'NM Catatan' }}
+          BUILD_OBJECTIVE: ${{ github.event.inputs.objective }}
+          BUILD_TITLE: ${{ github.event.inputs.app_title }}
         run: |
           python builder/generate.py \
             --objective "$BUILD_OBJECTIVE" \
