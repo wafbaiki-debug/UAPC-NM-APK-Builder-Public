@@ -221,9 +221,10 @@ def classify(objective: str) -> str:
         r"worker|heartbeat|automasi|automation|"
         r"fail sampah|storage cleaner|storan"
     )
-    if re.search(unsupported, objective, re.IGNORECASE):
+    kind = resolve_template(objective)
+    if kind in TEMPLATES and re.search(unsupported, objective, re.IGNORECASE):
         raise ValueError("Objektif memerlukan fungsi yang tidak disokong pembina templat; APK tidak dibina")
-    return resolve_template(objective)
+    return kind
 
 
 def generate(objective: str, title: str, destination: Path) -> dict:
