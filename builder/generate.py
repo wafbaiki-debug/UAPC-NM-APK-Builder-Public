@@ -212,6 +212,17 @@ public final class MainActivity extends Activity {
 def classify(objective: str) -> str:
     if not isinstance(objective, str) or not (1 <= len(objective.strip()) <= MAX_OBJECTIVE):
         raise ValueError("Arahan perlu antara 1 dan 180 aksara")
+    # This is a four-template builder, NOT a general application generator.
+    # Reject unsupported requirements before matching incidental words such as
+    # "tugasan" in a complex PhoneCare / worker / automation specification.
+    unsupported = (
+        r"phone[ -]?care|penyelenggaraan|imbas(?:an)?|scan(?:ning)?|"
+        r"pendua|duplicate|duplikat|bersih(?:kan)?|cleanup|"
+        r"worker|heartbeat|automasi|automation|"
+        r"fail sampah|storage cleaner|storan"
+    )
+    if re.search(unsupported, objective, re.IGNORECASE):
+        raise ValueError("Objektif memerlukan fungsi yang tidak disokong pembina templat; APK tidak dibina")
     return resolve_template(objective)
 
 
